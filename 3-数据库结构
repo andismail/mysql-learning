@@ -84,7 +84,11 @@ VARCHAR和CHAR
 日期类型:
 	DATETIME:默认是YYYY-MM-DD HH:MM:SS,DATETIME(6)是带微秒的,与时区无关,占用8个字节,1000-01-01 00:00:00到9999-12-31 23:59:59
 	TIMESTAMP:显示上和DATETIME一样,1970年1月1日到当前时间的秒数,显示依赖于所指定的时区,占用4个字节,1970-01-01到2038-01-19
-		  表中可以指定一个数据被修改时自动更新的timestamp列,如果不指定默认是第一个timestamp类型的列
+		  表中可以指定一个数据被修改时自动更新的timestamp列,如果不指定默认是第一个timestamp类型的列可以不写其默认
+		  总的来说:timestamp的值不会是null,即使是update成null再查询的时候发现其也不是null,建表的时如果只有一列timestamp
+			   值(只有一列时不写默认是NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP),如果有多列timestamp需写明
+			   其默认值是DEFAULT CURRENT_TIMESTAMP,一张表中只能有一列ON UPDATE CURRENT_TIMESTAMP的列.
+		           自己理解其这么处理的原因可能是这个数据类型就叫timestamp时间戳,那时间戳怎么会有null的,最少也得有个默认的当前时间.
 		  设置时区:set time_zone='+10:00';-- 第10时区
 	5.6后新加的两种数据类型:
 		data:例如用户的生日,3个字节,比datetime,int,字符串要少,1000-01-01~9999-12-31
