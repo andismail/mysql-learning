@@ -1,0 +1,75 @@
+查看centos版本:
+	CentOS就是RedHat重新编译的版本
+	cat /etc/redhat-release
+
+关于.d结尾文件夹:
+	就是把配置文件放在一起,不用再像之前去改原来配置文件,或都说把配置文件分类
+
+关于etc文件夹:
+	系统配置文件,已知/etc/init.d/mysql 可以用来操作mysql启动关闭重启
+
+yum:
+	yum provides ifconfig		#可以找到ifconfig命令是通过安装哪个得到的
+
+ssh:
+	1.通过SSH工具连接虚拟机中的CentOS7要确保CentOS7安装了openssh-server
+	2.查看是否安装了yum list installed | grep openssh-server
+	3.如果没有安装的话使用yum install openssh-server
+	4.配置:
+		vim /etc/ssh/sshd_config
+		打开
+			Port 22				#ssh默认端口
+			ListenAddress 0.0.0.0
+			ListenAddress ::
+			PermitRootLogin yes		#允许远程登录
+			PasswordAuthentication yes	#使用用户名密码来作为连接验证
+	5.开启sshd服务:
+		service sshd start
+	6.检查sshd服务是否已经开启:
+		输入ps -e | grep sshd
+		或者输入netstat -an | grep 22  检查  22 号端口是否开启监听
+
+MAC如何查看本机网关:
+	netstat -nr
+
+虚拟机中centos下修改ip地址:
+	vim /etc/sysconfig/network-scripts/ifcfg-enp0
+	增加或修改以下内容:
+		BOOTPROTO="dhcp" 	# dhcp static
+		DEVICE="enp0s3"    	# 设备名,可能是网卡的名字
+		ONBOOT="yes"
+		IPADDR=192.168.1.204	#IP地址
+		NETMASK=255.255.255.0	#子网掩码
+		GATEWAY=192.168.1.1	#网关
+		DNS1=192.168.1.1	#DNS
+	注:此处使用的是桥接模式,其实配置里网关 DNS 子网掩码 都不用写,但dhcp改成static后能ping通宿主机但ping不能www.baidu.com
+	注:虚拟机网络配置
+		NAT模式:虚拟机能ping通宿主机能上网,但宿主机ping不通虚拟机,修改虚拟机ip地址相关后不能上网ping不通宿主机
+		桥接模式下:虚拟机网络不用配置就能上网,和宿主机之间也相互也可以ping通,修改ip后也正常
+		Host only:
+	修改后重启服务:service network restart
+
+在CentOS中安装MariaDB:
+	1.在 /etc/yum.repos.d/ 文件夹下增加MariaDB.repo,其具体内容见官网,和以前的改yum源不一样,这个直接放在.结尾的文件夹下就行了,也不用刷新缓存啥的
+	2.yum install MariaDB-server MariaDB-client	#慢,得装半天
+	3.启动数据库:/etc/init.d/mysql start  或 systemctl start mariadb 
+		相关命令:
+			systemctl start mariadb  	#启动MariaDB
+			systemctl stop mariadb  	#停止MariaDB
+			systemctl restart mariadb  	#重启MariaDB
+			systemctl enable mariadb  	#设置开机启动
+	4.登陆:
+		1.新装的数据库是没有密码的,直接 mysql -uroot 就能登陆
+		2.设置密码:
+			set password for 'root'@'localhost'=password('root');	#给root用户设置密码root
+	5.远程连接:
+		1.授权:
+			把所有库的所有表的所有权限给root用户,使用密码root登陆,且只限在192.168.1.%网段的设备
+			grant all privileges on *.* to root@'192.168.1.%' identified by 'root';
+		2.或者新建用户后再给其授权:
+			create user 'user_name'@'192.168.1.%' identified by 'password';
+		3.题外话:
+			1.其实grant命令就可以直接创建用户
+			2.mysql的用户在同一网段只能有一个密码和权限,但同一用户在不同网段可以有不同的密码和权限
+			3.远程连接的时候可能会报 ERROR 2003 (HY000): Can't connect to MySQL server on '192.168.1.204' (61)
+			  在数据库服务器上执行 防火墙 firewall-cmd --zone=public --add-port=3306/tcp
