@@ -1,3 +1,4 @@
+主从复制并不提供读写分离的功能
 MySQL复制功能:
 	MySQL的复制功能是构建大规模高可用应用的基础
 	因为MySQL事务的特性决定了它不能通过其简单的增加服务器解决负载,而MySQL复制功能为提供了分担读负载的办法
@@ -168,3 +169,22 @@ MySQL复制工作方式:
 	1.MySQL版本:5.6时才支持GTID
 	2.复制架构和主从复制切换方式
 	3.所使用的高可用管理组件
+
+MySQL复制拓扑:
+	1.一主多从
+		1.为不同业务提供不同的从库
+		2.将一台人库放到远程IDC上，用作灾备恢复
+		3.分担主库读负载
+	2.主-主复制拓扑
+	3.
+
+MySQL复制性能优化:
+	1.影响主从延迟的因素
+		1.主库写入二进制日志的时间:解决:控制主库的事务大小,分割大事务
+		2.二进制日志传输时间:解决:设置日志格式为混合模式,设置minmal
+	2.配置多线程复制
+		stop slave;
+		set global slave_parallel_type='logical_clock';		#基于逻辑时钟
+		set global slave_parallelworkers=4;			#并发线程数
+		start slave;
+	3.show variables like '%parallel%';	#默认是DATABASE
