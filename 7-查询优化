@@ -1,0 +1,31 @@
+如何获得有性能问题的SQL
+	1.通过用户反馈,或测试人员反馈
+	2.通过慢查日志获取存在性能问题的SQL
+	3.实时获取存在性能问题的SQL
+
+使用慢查日志获取有性能问题的SQL
+	slow_query_log			#启动停止慢查日志
+	slow_query_log_file		#指定慢查日志的存储路径及文件
+	long_query_time			#指定记录慢查日志SQL执行时间阀值
+	long_queries_not_using_indexes	#是否记录未使用索引的SQL
+
+分析慢查日志工具
+	mysqldumpslow -s r -t 10 slow-mysql.log
+	-s order (c,t,l,r,at,al,ar)指定按哪种排序方式输出结果:
+		c:总次数
+		t:总时间
+		l:锁的时间
+		r:总行数
+		at,al,ar:t,l,r平均数
+
+	pt-query-digest --explain h=127.0.0.1,u=root,p=password slow-mysql.log
+		--explain	#结果中显示执行计划
+
+实时获取有性能的问题的SQL
+	information_schema库中的PROCESSLIST表
+	SELECT id, user, db, command, time, state, info FROM information_schema.processlist WHERE time>60;	#时间单位秒
+
+查询为什么会慢
+	1.客户端发送SQL请求给服务器
+	2.服务器会检查在查询缓存中是否命中该SQL
+	3.服务器端进行SQL解析，预处理，再由优化器生成对应的执行计划
