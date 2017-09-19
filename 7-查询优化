@@ -29,3 +29,42 @@
 	1.客户端发送SQL请求给服务器
 	2.服务器会检查在查询缓存中是否命中该SQL
 	3.服务器端进行SQL解析，预处理，再由优化器生成对应的执行计划
+
+查询缓存对SQL性能的影响
+	1.优先检查这个查询是否命中查询缓存中的数据
+	2.通过一个对大小写敏感的哈希查找实现的
+	3.Hash查找只能进行全值匹配，所以从查询缓存中直接返回结果并不容易
+	4.对于一个读写频繁的系统使用查询缓存很可能会降低查询处理效率,所以这种情况下不建议使用查询缓存
+		show variables like 'query_cache_type'; # 查询缓存是否开启
+		show variables like 'query_cache_size'; # 查询缓存大小
+
+MySQL依照执行计划与存储引擎进行交互
+	1.解析SQL
+	2.预处理
+	3.优化SQL执行计划
+
+查看执行时间
+	1.profile(已过时)
+		show variables like 'profiling'; # 查看profile是否打开
+		set profiling =1; # 开启profile
+		show profiles; # 查询启动后的所有操作的耗时
+		show profile for query 1; # 查看指定操作的耗时
+		show profile cpu for query 1; # 查看指定操作的耗时和消耗的CPU
+	2.performance_schema(推荐使用)
+		UPDATE setup_instruments SET enable='YES',TIMES='YES' WHERE name LIKE 'stage%';
+		UPDATE setup_consumers SET enabled='YES' WHERE name LIKE 'events%';
+		一长串SQL
+
+前面已经说过对于大表数据的修改要分批处理
+	1000万行记录的表中删除/更新100万行记录，一次删除或更新很少的一部分数据
+
+如何修改大表表结构
+	对表中的列的字段类型进行修改、改变字段宽度时会锁表，同时无法解决主从数据库延迟问题
+	1.pt-online-schema-change
+		原理:建新的结构一样的表，同步数据到新表，改表名，排它锁，删表
+
+如何优化not in 和 <>
+	拆成关联查询或代码实现
+
+使用汇总表优化统计查询
+	如商品评论数可以在每天凌晨把评论数存起来，而不是select count(*)
