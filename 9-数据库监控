@@ -1,0 +1,33 @@
+对什么进行监控
+	1.对数据库服务可用性监控
+		1.通过网络连接到数据库并且确定数据库是可以对外提供服务的
+			1.mysqladmin -umonitor_user -p -h ping #ping远程机器看其服务是否可用
+			2.telnet ip db_port #ping远程机器db_port端口是否可用
+			3.使用程序通过网络建立数据库连接
+		2.如何监控数据库是否可读写
+			1.检察数据库read_only参数是否打开
+			2.建立监控表并对表中数据操作以验证
+			3.执行简单查询 SELECT @@version;
+		3.如何监控数据库的连接数
+			1.如redis缓存失效、数据库出现阻塞等会出现连接数突增
+			2.SHOW VARIABLES LIKE 'MAX_CONNECTIONS'; # 数据库最大连接数
+			3.SHOW GLOBAL STATUS LIKE 'THREADS_CONNECTED'; # 当前数据库连接数据
+			4. 比如 THREADS_CONNECTED/MAX_CONNECTIONS>0.8 就报警
+	2.对数据库性能的监控
+		1.QPS和TPS的监控
+		2.并发线程数量的监控(并发线程数并不等于数据库连接数)
+			如何对Innodb阻塞和死锁进行监控
+	3.对主从复制进行监控
+		1.主从复制链路状态的监控
+		2.主从复制延迟的监控
+		3.定期的确认主从复制的数据是否一致
+	4.数据库所在服务器的服务器资源进行监控
+		1.磁盘空间
+			服务器磁盘空间大并不意味着MySQL可使用的磁盘空间大
+		2.内存使用
+		3.CPU使用
+		4.网络IO
+	5.主从数据库的监控	SHOW SLAVE STATUS
+		1.对主和从的IO进行监控
+		2.主从复制的延迟，参与主从复制的服务器间一定存在着延迟
+		3.pt-table-checksum
