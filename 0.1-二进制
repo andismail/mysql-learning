@@ -22,3 +22,25 @@
 	取反运算~：对一个二进制数按位取反，即将0变1，将1变0。	例如：~0=1 ~1=0
 
 	正数的左移运算<<	正数的右移运算>>	无符号右称>>>
+
+java
+	Integer.toBinaryString(x);//2
+	Integer.toHexString(x));//16
+	Integer.toOctalString(x);//8
+	Integer.parseInt("10100", 2);//2进制转10进制
+
+    static byte[] int2ByteArray(Integer x) {
+        byte[] bytes = new byte[4];//4个字节
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) (x >> i * 8 & 0xff);
+        }
+        return bytes;
+    }
+
+    static Integer byteArray2Int(byte[] bytes) {
+        Integer x = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            x += (bytes[i] & 0xff) << i * 8;
+        }
+        return x;
+    }
